@@ -30,23 +30,45 @@ app.get('/', (req,res)=> {
         all : "localhost:8000/all - Get the list of all restaurants and hotels",
 
         restaurants : {
-            all : "localhost:8000/restaurants - Get the list of all restaurants",
-            id : "localhost:8000/restaurants/id/:id - Search a specific restaurant by its ID",
-            name :  "localhost:8000/restaurants/name/:name - Search a specific restaurant by its name",
-            country : "localhost:8000/restaurants/country/:country - Search restaurants by country",
-            city : "localhost:8000/restaurants/city/:city - Search restaurants by city",
-            cuisine : "localhost:8000/restaurants/cuisine/:cuisine - Search restaurants by their type of cuisine ",
-            pricecategory : "localhost:8000/restaurants/pricecategory/:pricecategory - Search restaurants by price category",
+            GET : {
+
+                all : "localhost:8000/restaurants - Get the list of all restaurants",
+                id : "localhost:8000/restaurants/id/:id - Search a specific restaurant by its ID",
+                name :  "localhost:8000/restaurants/name/:name - Search a specific restaurant by its name",
+                country : "localhost:8000/restaurants/country/:country - Search restaurants by country",
+                city : "localhost:8000/restaurants/city/:city - Search restaurants by city",
+                cuisine : "localhost:8000/restaurants/cuisine/:cuisine - Search restaurants by their type of cuisine ",
+                stars : "localhost:8000/restaurants/stars/:stars - Get restaurants by their number of stars",
+                pricecategory : "localhost:8000/restaurants/pricecategory/:pricecategory - Search restaurants by price category",
+            },
+
+            POST : "localhost:8000/restaurants - Add a new restaurant in the list of hotels",
+
+            PATCH :  "localhost:8000/restaurants/:id - Update a restaurant with its ID",
+
+            DELETE : "localhost:8000/restaurants/:id - Delete a restaurant with its ID",
          },
 
-        hotels :{
-            all : "localhost:8000/hotels - Get the list of all hotels",
-            name : "localhost:8000/hotels/id/:id - Search a specific hotel by its name",
-            country : "localhost:8000/hotels/country/:country - Search hotels by country",
-            city : "localhost:8000/hotels/city/:city - Search hotels by city",
-            stars : "localhost:8000/hotels/cuisine/:stars - Search hotels by their type of cuisine ",
-            pool : "localhost:8000/hotels/cuisine/:pool - Search hotels by their type of cuisine ",
-            pricecategory : "localhost:8000/hotels/pricecategory/:pricecategory - Search hotels by price category",
+        hotels : {
+            GET : {
+
+                all : "localhost:8000/hotels - Get the list of all hotels",
+                id : "localhost:8000/hotels/id/:id - Get an hotel by its ID",
+                name : "localhost:8000/hotels/name/:name - Get a specific hotel by its name",
+                country : "localhost:8000/hotels/country/:country - Get hotels by country",
+                city : "localhost:8000/hotels/city/:city - Get hotels by city",
+                stars : "localhost:8000/hotels/stars/:stars - Get hotels by their number of stars",
+                spa : "localhost:8000/hotels/spa/ - Get hotels with a spa ",
+                pool : "localhost:8000/hotels/pool - Get hotels with a pool ",
+                pricecategory : "localhost:8000/hotels/pricecategory/:pricecategory - Get hotels by price category",
+            },
+
+            POST : "localhost:8000/hotels - Add a new hotel in the list of hotels",
+
+            PATCH :  "localhost:8000/hotels/:id - Update an hotel with its ID",
+
+            DELETE : "localhost:8000/hotels/:id - Delete an hotel with its ID",
+            
          },
                         
     });
