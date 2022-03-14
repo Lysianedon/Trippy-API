@@ -5,20 +5,25 @@ const port = 8000;
 //Libraraies -------------------
 const Joi = require("Joi");
 //------- Routes imports -------
-const hotels = require('./Hotels');
-const restaurants = require('./Restaurants');
+const Hotels = require('./Hotels');
+const Restaurants = require('./Restaurants');
 
 
 // ---------------------------------- MIDDLEWARES -----------------------------------------
 app.use(express.json());
 
 const debug = app.use((req,res,next) => {
-
     console.log("request received.");
     next();
 })
 
+//RESTAURANTS ROUTES ---------------
+app.use('/restaurants', Restaurants);
 
+//HOTELS ROUTES --------------------
+app.use('/hotels', Hotels);
+
+// -------------------------------------- ROUTES ------------------------------------------
 app.get('/', (req,res)=> {
 
     res.status(201).json(
@@ -75,10 +80,9 @@ app.get('/', (req,res)=> {
 })
 
 
-
-
-
-
+app.get('*', (req,res)=> {
+    res.status(404).json({message : "404 NOT FOUND."});
+})
 
 
 
