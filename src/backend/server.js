@@ -5,9 +5,12 @@ const port = 8000;
 //Libraraies -------------------
 const Joi = require("Joi");
 const rateLimit = require('express-rate-limit') //rate-limiting middleware for API calls
+const { v4: uuidv4 } = require('uuid'); // API key generator
 //------- Routes imports -------
 const Hotels = require('./Hotels');
 const Restaurants = require('./Restaurants');
+//PremiumUsers List : 
+const premiumUsers = [];
 
 
 // ---------------------------------- MIDDLEWARES -----------------------------------------
@@ -35,6 +38,8 @@ app.use('/restaurants', Restaurants);
 app.use('/hotels', Hotels);
 
 // -------------------------------------- ROUTES ------------------------------------------
+//------------------------------ WE ARE IN : localhost:8000/ ------------------------------
+
 app.get('/', (req,res)=> {
 
     res.status(201).json(
@@ -91,11 +96,38 @@ app.get('/', (req,res)=> {
 })
 
 
-app.get('*', (req,res)=> {
-    res.status(404).json({message : "404 NOT FOUND."});
+
+app.post('/premium', (req,res) => {
+
+    //Guard :
+    //Checking if the username is a string :
+    const scheme = Joi.object({
+        username : Joi.string().min(1).max(30).required(),
+    })
+
+    const validateUsername = scheme.validate(req.body);
+
+    //If the req.body doesn't respect the scheme, an error message is displayed :
+    if (validateUsername.error) {
+        return res.status(400).json({
+            message : validateUsername.error.details[0].message,
+        })
+    }
+    const apiKey = uuidv4();
+    const premiumUser = {
+        username : req.body.username,
+        apiKey
+    }
+
+    premiumUsers.push(premiumUser);
+    return res.status(201).json({apiKey});
 })
 
 
+
+app.get('*', (req,res)=> {
+    res.status(404).json({message : "404 NOT FOUND."});
+})
 
 
 
