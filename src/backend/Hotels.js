@@ -3,7 +3,7 @@ const router = express.Router();
 //Libraraies -------------------
 const Joi = require("Joi");
 const uniqid = require("uniqid");
-//Import RestaurantsData
+//Import HotelsData
 let HotelsData = require('./HotelsData.json');
 
 // ---------------------------------- MIDDLEWARES -----------------------------------------
@@ -92,12 +92,44 @@ function addRandomID(req,res,next) {
     next();
    };
 
+// >------- SEARCH HOTELS BY CRITERIA -----------> 
+function searchHotelsByCriteria (req,res,next) {
+
+    let selectedHotels = HotelsData;
+    //If the query params 'country' exists in the URL, then the function will return the list of hotels in the given country : 
+    if (req.query.country) {
+        req.country = req.query.country;
+        selectedHotels = selectedHotels.filter(hotel => hotel.country.toLowerCase() === req.country.toLowerCase());
+        //If no hotel was found : the function returns a 404 message : 
+        if (selectedHotels.length === 0) {
+            return res.status(404).json(`There is no hotel in ${req.country}. Please search in another location.`);
+        }
+
+        req.selectedHotels = selectedHotels;
+    }
+    //If the query params 'pricecatagory' exists in the URL, then the function will return the list of hotel in the given price catagory : 
+    if (req.query.pricecategory) {
+        req.pricecategory = req.query.pricecategory;
+        selectedHotels = selectedHotels.filter(hotel => hotel.priceCategory.toString() === req.pricecategory);
+        
+         //If no hotel was found : the function returns a 404 message : 
+        if (selectedHotels.length === 0) {
+            return res.status(404).json(`There is no hotel in price category ${req.pricecategory} in ${req.country} .`);
+        }
+    }
+    req.selectedHotels = selectedHotels;
+
+    next();
+}
+
 // ----------------------------------------- ROUTES -----------------------------------------
 //------------------------------ WE ARE IN : localhost:8000/hotels/ -------------------------
 
 //GET THE LIST OF ALL HOTELS  : 
-router.get('/', (req,res) => {
-    res.status(201).json(HotelsData);
+router.get('/',searchHotelsByCriteria, (req,res) => {
+ 
+    return res.status(201).json({results : req.selectedHotels});
+
 })
 
 //GET A HOTEL BY ITS ID: 
