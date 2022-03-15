@@ -109,12 +109,12 @@ function addRandomID(req,res,next) {
     next();
    };
 
-function searchRestaurantsByCountry (req,res,next) {
+function searchRestaurantsByCriteria (req,res,next) {
 
     let selectedRestaurants = restaurantsData;
     if (req.query.country) {
         req.country = req.query.country;
-        selectedRestaurants = restaurantsData.filter(restaurant => restaurant.country.toLowerCase() === req.country.toLowerCase());
+        selectedRestaurants = selectedRestaurants.filter(restaurant => restaurant.country.toLowerCase() === req.country.toLowerCase());
 
         if (selectedRestaurants.length === 0) {
             return res.status(404).json(`There is no restaurants in ${req.country}. Please search in another location.`);
@@ -132,34 +132,17 @@ function searchRestaurantsByCountry (req,res,next) {
             return res.status(404).json(`There is no restaurants in price category ${req.pricecategory} in ${req.country} .`);
         }
 
-        req.selectedRestaurants = selectedRestaurants;
     }
+    req.selectedRestaurants = selectedRestaurants;
 
     next();
 }
 
-// function searchRestaurantsByPrice (req,res,next) {
-
-//     if (req.query.country) {
-//         req.country = req.query.country;
-//     }
-//     const selectedRestaurants = restaurantsData.filter(restaurant => restaurant.country.toLowerCase() === req.country.toLowerCase());
-
-//     if (selectedRestaurants.length === 0) {
-//         return res.status(404).json(`There is no restaurants in ${req.country}. Please search in another location.`);
-//     }
-
-//     req.selectedRestaurants = selectedRestaurants;
-
-//     next();
-// }
-
 // ----------------------------------------- ROUTES -----------------------------------------
 //------------------------------ WE ARE IN : localhost:8000/restaurants/ --------------------
 
-router.get('/',searchRestaurantsByCountry, (req,res) => {
+router.get('/',searchRestaurantsByCriteria, (req,res) => {
     
-    console.log(req.country);
     return res.status(201).json(req.selectedRestaurants);
 
 })
