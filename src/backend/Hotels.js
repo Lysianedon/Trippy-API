@@ -40,6 +40,17 @@ function validateHotel(req,res,next){
 
 function checkIfHotelAlreadyExists(req,res,next) {
 
+    if (req.params.name) {
+        
+        if (HotelsData.filter(hotel => hotel.name.toLowerCase().replace(' ', '-') === req.params.name.toLowerCase().replace(' ', '-')).length <= 0) {
+            req.paramsNameExists = false;
+            return res.status(404).json({message : "This hotel doesn't exist in our database. "})
+            
+        } else {
+            req.paramsNameExists = true;
+        }   console.log("true : ",req.paramsNameExists);
+    }
+
     if (req.body.name) {
         
         if (HotelsData.filter(hotel => hotel.name.toLowerCase().replace(' ', '-') === req.body.name.toLowerCase().replace(' ', '-')).length <= 0) {
@@ -51,16 +62,7 @@ function checkIfHotelAlreadyExists(req,res,next) {
         }
     }
 
-    if (req.params.name) {
-        
-        if (HotelsData.filter(hotel => hotel.name.toLowerCase().replace(' ', '-') === req.params.name.toLowerCase().replace(' ', '-')).length <= 0) {
-            req.paramsNameExists = false;
-            return res.status(404).json({message : "This hotel doesn't exist in our database. "})
-            
-        } else {
-            req.paramsNameExists = true;
-        }   console.log("true : ",req.paramsNameExists);
-    }
+
 
     // if (req.params.id) {
     //     if (HotelsData.filter(hotel => hotel.id.toString() === req.params.id).length <= 0) {
@@ -136,29 +138,29 @@ router.patch('/:name', checkIfHotelAlreadyExists, (req,res) => {
     const hotelExists = req.paramsNameExists ;
     const nameAlreadyExists = req.bodyNameExists ;
    
-            //Find hotel :
-            let hotel = HotelsData.find(hotel => {
-                return hotel.name.toLowerCase().replace(' ', '-') === currentName.toLowerCase().replace(' ', '-');  
-            })
+    //Find hotel : 
+    let hotel = HotelsData.find(hotel => {
+        return hotel.name.toLowerCase().replace(' ', '-') === currentName.toLowerCase().replace(' ', '-');  
+    })
 
-            //Checking if the name is a string :
-            const scheme = Joi.object({
-               name : Joi.string().min(1).max(30).required(),
-            })
+    //Checking if the name is a string :
+    const scheme = Joi.object({
+        name : Joi.string().min(1).max(30).required(),
+    })
 
-            const validateName = scheme.validate(newName);
+    const validateName = scheme.validate(req.body);
 
-            //Guard : 
-            if (validateName.error) {
-                return res.status(400).json({
-                    message : validateName.error.details[0].message,
-                })
-            }
+    //Guard : 
+    if (validateName.error) {
+        return res.status(400).json({
+            message : validateName.error.details[0].message,
+        })
+    }
 
-            //Updating the hotel's name in the database:
-            hotel.name = newName;
+    //Updating the hotel's name in the database:
+    hotel.name = newName;
 
-            return res.status(201).json({message : "Hotel's name updated !", hotel});
+    return res.status(201).json({message : "Hotel's name updated !", hotel});
         
 
     
