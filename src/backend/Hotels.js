@@ -107,7 +107,7 @@ function searchHotelsByCriteria (req,res,next) {
 
         req.selectedHotels = selectedHotels;
     }
-    //If the query params 'pricecatagory' exists in the URL, then the function will return the list of hotel in the given price catagory : 
+    //If the query params 'pricecatagory' exists in the URL, then the function will return the list of hotels in the given price catagory : 
     if (req.query.pricecategory) {
         req.pricecategory = req.query.pricecategory;
         selectedHotels = selectedHotels.filter(hotel => hotel.priceCategory.toString() === req.pricecategory);
@@ -117,6 +117,28 @@ function searchHotelsByCriteria (req,res,next) {
             return res.status(404).json(`There is no hotel in price category ${req.pricecategory} in ${req.country} .`);
         }
     }
+    //If the query params 'spa' exists in the URL, then the function will return the list of hotels with or without a spa : 
+    if (req.query.spa) {
+        req.spa = req.query.spa;
+        selectedHotels = selectedHotels.filter(hotel => hotel.hasSpa.toString() === req.spa);
+
+         //If no hotel was found : the function returns a 404 message : 
+        if (selectedHotels.length === 0) {
+            return res.status(404).json(`No hotel was found within these criteria.`);
+        }
+    }
+
+    //If the query params 'pool' exists in the URL, then the function will return the list of hotels with or without a pool : 
+    if (req.query.pool) {
+        req.pool = req.query.pool;
+        selectedHotels = selectedHotels.filter(hotel => hotel.hasPool.toString() === req.pool);
+
+            //If no hotel was found : the function returns a 404 message : 
+        if (selectedHotels.length === 0) {
+            return res.status(404).json(`No hotel was found within these criteria.`);
+        }
+    }
+
     req.selectedHotels = selectedHotels;
 
     next();
@@ -127,7 +149,6 @@ function searchHotelsByCriteria (req,res,next) {
 
 //GET THE LIST OF ALL HOTELS  : 
 router.get('/',searchHotelsByCriteria, (req,res) => {
- 
     return res.status(201).json({results : req.selectedHotels});
 
 })
