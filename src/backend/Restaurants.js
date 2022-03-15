@@ -111,19 +111,48 @@ function addRandomID(req,res,next) {
 
 function searchRestaurantsByCountry (req,res,next) {
 
+    let selectedRestaurants = restaurantsData;
     if (req.query.country) {
         req.country = req.query.country;
-    }
-    const selectedRestaurants = restaurantsData.filter(restaurant => restaurant.country.toLowerCase() === req.country.toLowerCase());
+        selectedRestaurants = restaurantsData.filter(restaurant => restaurant.country.toLowerCase() === req.country.toLowerCase());
 
-    if (selectedRestaurants.length === 0) {
-        return res.status(404).json(`There is no restaurants in ${req.country}. Please search in another location.`);
+        if (selectedRestaurants.length === 0) {
+            return res.status(404).json(`There is no restaurants in ${req.country}. Please search in another location.`);
+        }
+
+        req.selectedRestaurants = selectedRestaurants;
+
     }
 
-    req.selectedRestaurants = selectedRestaurants;
+    if (req.query.pricecategory) {
+        req.pricecategory = req.query.pricecategory;
+        selectedRestaurants = selectedRestaurants.filter(restaurant => restaurant.priceCategory.toString() === req.pricecategory);
+
+        if (selectedRestaurants.length === 0) {
+            return res.status(404).json(`There is no restaurants in price category ${req.pricecategory} in ${req.country} .`);
+        }
+
+        req.selectedRestaurants = selectedRestaurants;
+    }
 
     next();
 }
+
+// function searchRestaurantsByPrice (req,res,next) {
+
+//     if (req.query.country) {
+//         req.country = req.query.country;
+//     }
+//     const selectedRestaurants = restaurantsData.filter(restaurant => restaurant.country.toLowerCase() === req.country.toLowerCase());
+
+//     if (selectedRestaurants.length === 0) {
+//         return res.status(404).json(`There is no restaurants in ${req.country}. Please search in another location.`);
+//     }
+
+//     req.selectedRestaurants = selectedRestaurants;
+
+//     next();
+// }
 
 // ----------------------------------------- ROUTES -----------------------------------------
 //------------------------------ WE ARE IN : localhost:8000/restaurants/ --------------------
