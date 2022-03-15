@@ -38,13 +38,50 @@ function validateHotel(req,res,next){
     next();
 }
 
-function checkIfHotelExists(req,res,next) {
+function checkIfHotelAlreadyExists(req,res,next) {
 
+    if (req.body.name) {
+        
+        if (HotelsData.filter(hotel => hotel.name.toLowerCase().replace(' ', '-') === req.body.name.toLowerCase().replace(' ', '-')).length <= 0) {
+            req.bodyNameExists = false;
 
+        } else {
+            req.bodyNameExists = true;
+            return res.status(404).json({message : "This hotel already exist. Please choose another name."})
+        }
+    }
+
+    if (req.params.name) {
+        
+        if (HotelsData.filter(hotel => hotel.name.toLowerCase().replace(' ', '-') === req.params.name.toLowerCase().replace(' ', '-')).length <= 0) {
+            req.paramsNameExists = false;
+            return res.status(404).json({message : "This hotel doesn't exist in our database. "})
+            
+        } else {
+            req.paramsNameExists = true;
+        }   console.log("true : ",req.paramsNameExists);
+    }
+
+    // if (req.params.id) {
+    //     if (HotelsData.filter(hotel => hotel.id.toString() === req.params.id).length <= 0) {
+    //         req.paramsIdExists = false;
+    //     } else {
+    //         req.paramsIdExists = true;
+    //     }
+
+    // }
+
+    // if (req.body.id) {
+    //     if (HotelsData.filter(hotel => hotel.id === req.body.id).length <= 0) {
+    //         req.bodyIdExists = false;
+    //     } else {
+    //         req.bodyIdExists = true;
+    //     }
+
+    // }
 
     next();
 }
-
 
 
 function findHotelByID(req,res,next) {
@@ -54,6 +91,10 @@ function findHotelByID(req,res,next) {
     const hotel = HotelsData.find(hotel => {
         return hotel.id.toString() === id;
     })
+
+    if (hotel === undefined) {
+        return res.status(404).json({message : "This hotel doesn't exist. "})
+    }
 
     req.hotel = hotel;
 
@@ -89,21 +130,41 @@ router.post('/',validateHotel, (req,res)=> {
 })
 
 //UPDATE A HOTEL'S NAME : 
-router.patch('/:name', (req,res) => {
+router.patch('/:name', checkIfHotelAlreadyExists, (req,res) => {
     const currentName = req.params.name;
     const newName = req.body.name;
+    const hotelExists = req.paramsNameExists ;
+    const nameAlreadyExists = req.bodyNameExists ;
+   
+            //Find hotel :
+            let hotel = HotelsData.find(hotel => {
+                return hotel.name.toLowerCase().replace(' ', '-') === currentName.toLowerCase().replace(' ', '-');  
+            })
 
-    //Find hotel :
-    let hotel = HotelsData.find(hotel => {
-        return hotel.name.toLowerCase().replace(' ', '-') === currentName.toLowerCase().replace(' ', '-');  
-    })
+            //Checking if the name is a string :
+            const scheme = Joi.object({
+               name : Joi.string().min(1).max(30).required(),
+            })
 
-    //Updating the hotel's name in the database:
-    hotel.name = newName;
-    res.status(201).json({message : "Hotel's name updated !", hotel});
+            const validateName = scheme.validate(newName);
+
+            //Guard : 
+            if (validateName.error) {
+                return res.status(400).json({
+                    message : validateName.error.details[0].message,
+                })
+            }
+
+            //Updating the hotel's name in the database:
+            hotel.name = newName;
+
+            return res.status(201).json({message : "Hotel's name updated !", hotel});
+        
+
+    
 })
 
-router.delete('/:id',findHotelByID, (req,res) => {
+router.delete('/:id', findHotelByID, (req,res) => {
     const deletedHotel = req.hotel;
 
     //Delete function :
