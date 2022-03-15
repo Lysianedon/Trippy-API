@@ -4,6 +4,7 @@ const router = express.Router();
 const port = 8000;
 //Libraraies -------------------
 const Joi = require("Joi");
+const rateLimit = require('express-rate-limit') //rate-limiting middleware for API calls
 //------- Routes imports -------
 const Hotels = require('./Hotels');
 const Restaurants = require('./Restaurants');
@@ -16,6 +17,16 @@ const debug = app.use((req,res,next) => {
     console.log("request received.");
     next();
 })
+
+const limiter = rateLimit({
+	windowMs: 1 * 60 * 1000, // 15 minutes
+	max: 100, // Limit each IP to 100 requests per `window` (here, per 1 minute)
+	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+})
+
+// Apply the rate limiting middleware to all requests
+app.use(limiter)
 
 //RESTAURANTS ROUTES ---------------
 app.use('/restaurants', Restaurants);
