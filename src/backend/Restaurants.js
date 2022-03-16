@@ -117,6 +117,7 @@ function searchRestaurantsByCriteria (req,res,next) {
     //Guard : Checking if the query params exist :
     if (req.query) {
         
+        //Adding all of my object keys into an array:
         const keys = Object.keys(req.query);
         
         for (let i = 0; i < keys.length; i++) {
