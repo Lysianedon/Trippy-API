@@ -5,6 +5,8 @@ const Joi = require("Joi");
 const uniqid = require("uniqid");
 //Import RestaurantsData
 let restaurantsData = require('./RestaurantsData.json');
+//Import PremiumUsers List : 
+const premiumUsers = require('./PremiumUsers');
 
 
 // ---------------------------------- MIDDLEWARES -----------------------------------------
@@ -62,8 +64,6 @@ function validateRestaurant(req,res,next){
     //CHECKING EVERY VALUE TO SEE IF THEIR FORMAT IS CORRECT :
     //Creating the scheme validation :
     const schema = Joi.object({
-
-        // id : Joi.number().integer().min(3).strict().required(),
         name : Joi.string().min(1).max(30).required(),
         address : Joi.string().min(5).max(90).required(),
         city : Joi.string().min(1).max(30).required(),
@@ -109,29 +109,36 @@ function addRandomID(req,res,next) {
     next();
    };
 
+// >------- SEARCH RESTAURANTS BY CRITERIA -----------> 
 function searchRestaurantsByCriteria (req,res,next) {
 
     let selectedRestaurants = restaurantsData;
-    if (req.query.country) {
-        req.country = req.query.country;
-        selectedRestaurants = selectedRestaurants.filter(restaurant => restaurant.country.toLowerCase() === req.country.toLowerCase());
 
-        if (selectedRestaurants.length === 0) {
-            return res.status(404).json(`There is no restaurants in ${req.country}. Please search in another location.`);
+    //Guard : Checking if the query params exist :
+    if (req.query) {
+        
+        const keys = Object.keys(req.query);
+        
+        for (let i = 0; i < keys.length; i++) {
+            
+            //The key we are looping over : 
+            let key = keys[i];
+            key = key.toLowerCase();
+            console.log(key);
+           // if query params doesn't exist, a 404 message is returned :  
+            if (!selectedRestaurants[0].hasOwnProperty(key)) {
+                return res.status(404).json({error : `The filter "${keys[i]}" doesn't exist.`})
+            }
+            //Adding the value to req : 
+            req.key = req.query[key];
+
+            selectedRestaurants = selectedRestaurants.filter(restaurant => restaurant[key].toString().toLowerCase() === req.query[key].toLowerCase());
+            //If no restaurants was found : the function returns a 404 message : 
+            if (selectedRestaurants.length === 0) {
+                return res.status(404).json(`There is no restaurants matching your criteria.`);
+            }
+            req.selectedRestaurants = selectedRestaurants;
         }
-
-        req.selectedRestaurants = selectedRestaurants;
-
-    }
-
-    if (req.query.pricecategory) {
-        req.pricecategory = req.query.pricecategory;
-        selectedRestaurants = selectedRestaurants.filter(restaurant => restaurant.priceCategory.toString() === req.pricecategory);
-
-        if (selectedRestaurants.length === 0) {
-            return res.status(404).json(`There is no restaurants in price category ${req.pricecategory} in ${req.country} .`);
-        }
-
     }
     req.selectedRestaurants = selectedRestaurants;
 
@@ -142,8 +149,8 @@ function searchRestaurantsByCriteria (req,res,next) {
 //------------------------------ WE ARE IN : localhost:8000/restaurants/ --------------------
 
 router.get('/',searchRestaurantsByCriteria, (req,res) => {
-    
-    return res.status(201).json(req.selectedRestaurants);
+ 
+    return res.status(201).json({results : req.selectedRestaurants});
 
 })
 
