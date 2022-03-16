@@ -123,9 +123,8 @@ function searchRestaurantsByCriteria (req,res,next) {
             
             //The key we are looping over : 
             let key = keys[i];
-            key = key.toLowerCase();
             console.log(key);
-           // if query params doesn't exist, a 404 message is returned :  
+           // if query params doesn't exist, a 404 message is returned : 
             if (!selectedRestaurants[0].hasOwnProperty(key)) {
                 return res.status(404).json({error : `The filter "${keys[i]}" doesn't exist.`})
             }
