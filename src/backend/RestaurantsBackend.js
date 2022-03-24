@@ -105,19 +105,28 @@ function validateRestaurant(req,res,next){
 }
 
 // >-------FIND RESTAURANT BY ID ----------->
-function findRestaurantByID(req,res,next) {
+async function findRestaurantByID(req,res,next) {
 
     const id = req.params.id;
+    let restaurant;
+    //Making sure the ID param is valid : 
+    const schema = Joi.string().min(1).max(50).required();
+    const validateRestaurantInfos = schema.validate(id);
     
-    const restaurant = restaurantsData.find(restaurant => {
-        return restaurant.id.toString() === id;
-    })
-
-    if (restaurant === undefined) {
-        return res.status(404).json({message : "This restaurant doesn't exist. "})
+    //Guard : if the ID is not valid, an error message is returned : 
+    if (validateRestaurantInfos.error) {
+        return res.status(400).json({
+            message : validateRestaurantInfos.error.details[0].message,
+        })
     }
-
-    req.restaurant = restaurant;
+    
+    try {
+        restaurant = await Restaurant.findById(id);
+        req.restaurant = restaurant;
+        
+    } catch (error) {
+        req.paramIDExists = false;
+    }
 
     next();
 }
@@ -192,14 +201,15 @@ router.get('/',searchRestaurantsByCriteria, async (req,res) => {
 })
 
 //GET A RESTAURANT BY ITS ID: 
-router.get('/:id', findRestaurantByID, (req,res) => {
+router.get('/:id', findRestaurantByID, async (req,res) => {
 
-    let id = req.params.id;
-    const restaurant = restaurantsData.find(restaurant => {
-        return restaurant.id.toString() === id;  
-    })
-    
-    return res.status(201).json(restaurant);
+    //--------------------------- MONGODB --------------------------------------
+
+    //Guard : 
+    if (req.paramIDExists === false) {
+        return res.status(404).json({message : "This ID doesn't exist."})
+    }
+    return res.json(req.restaurant);
 })
 
 //ADD A NEW RESTAURANT : 
