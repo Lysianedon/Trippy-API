@@ -49,28 +49,33 @@ function findRestaurantByID(req,res,next) {
 }
 
 //>------- CHECK IF RESTAURANT NAME ALREADY EXISTS ----------->
-function checkIfRestaurantNameAlreadyExists(req,res,next) {
-
+async function checkIfRestaurantNameAlreadyExists(req,res,next) {
     if (req.params.name) {
-        
-        //If the param name is found in the restaurant database, then an error message is displayed : 
-        if (restaurantsData.filter(restaurant => restaurant.name.toLowerCase().replace(' ', '-') === req.params.name.toLowerCase().replace(' ', '-')).length <= 0) {
-            req.paramsNameExists = false;
-            return res.status(404).json({message : "This restaurant doesn't exist in our database. "})
-            
+        let restaurant = req.params.name.replaceAll('-', ' ').toLowerCase();
+        restaurant = await Restaurant.findOne({name : restaurant});
+
+        if (restaurant === null || restaurant === undefined) {
+            req.paramNameRestaurantExists = false;
         } else {
-            req.paramsNameExists = true;
-        }   console.log("true : ",req.paramsNameExists);
+            req.paramNameRestaurantExists = true;
+        }
     }
 
     if (req.body.name) {
         
-        if (restaurantsData.filter(restaurant => restaurant.name.toLowerCase().replace(' ', '-') === req.body.name.toLowerCase().replace(' ', '-')).length <= 0) {
-            req.bodyNameExists = false;
-            //If the body name is found in the restaurant database, then an error message is displayed : 
+        let restaurant = req.body.name.replaceAll('-', ' ').toLowerCase();
+        try {
+            restaurant = await Restaurant.findOne({name : restaurant});
+            
+        } catch(err) {
+            console.log(err);
+            res.status(201).json({message : "An error occured."})
+        }
+
+        if (restaurant === null || restaurant === undefined) {
+            req.bodyNameRestaurantExists = false;
         } else {
-            req.bodyNameExists = true;
-            return res.status(404).json({message : "This restaurant already exists. Please choose another name."})
+            req.bodyNameRestaurantExists = true;
         }
     }
 
@@ -213,10 +218,23 @@ router.get('/:id', findRestaurantByID, async (req,res) => {
 })
 
 //ADD A NEW RESTAURANT : 
-router.post('/',checkIfRestaurantNameAlreadyExists, validateRestaurant,addRandomID, (req,res)=> {
-    const restaurant = req.body;
-    restaurantsData.push(restaurant);
-    res.status(201).json({message : "Restaurant added !", restaurant : restaurantsData});
+router.post('/',checkIfRestaurantNameAlreadyExists, validateRestaurant, async (req,res)=> {
+
+    let restaurant = req.body, newRestaurant, restaurants;
+    //Guard :
+    if (req.bodyNameRestaurantExists === true) {
+        return res.status(401).json({message : "This restaurant already exists. Please choose another name."})
+    }
+
+    try {
+        newRestaurant = await Restaurant.create(restaurant);
+        restaurants = await Restaurant.find();
+    } catch(err) {
+        console.log(err);
+        return res.status(401).json({message : "An error happened."})
+    }
+
+    return res.status(201).json({message : "Restaurant added !", restaurants });
 
 })
 
